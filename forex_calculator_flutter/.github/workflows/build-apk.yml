@@ -1,8 +1,8 @@
-name: Build Android APK
+name: Build Flutter APK
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: [main, master]
   workflow_dispatch:
 
 permissions:
@@ -11,25 +11,29 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
 
-      - name: Set up Flutter
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-          cache: true
 
-      - name: Install dependencies
+      - name: Create Android project files
+        working-directory: forex_calculator_flutter
+        run: flutter create --platforms=android .
+
+      - name: Get dependencies
+        working-directory: forex_calculator_flutter
         run: flutter pub get
 
-      - name: Build release APK
+      - name: Build APK
+        working-directory: forex_calculator_flutter
         run: flutter build apk --release
 
-      - name: Upload APK artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: forex-calculator-release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
-          if-no-files-found: error
+          name: forex-calculator-apk
+          path: forex_calculator_flutter/build/app/outputs/flutter-apk/app-release.apk
